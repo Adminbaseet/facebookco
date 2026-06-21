@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>facebook co</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FB Co">
+  <meta name="theme-color" content="#1877f2">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="login-page">
+    <div class="login-bg-shapes">
+      <div class="shape s1"></div>
+      <div class="shape s2"></div>
+      <div class="shape s3"></div>
+      <div class="shape s4"></div>
+    </div>
+    <div class="login-container">
+      <div class="login-brand">
+        <div class="logo-wrapper">
+          <div class="logo-icon"><i class="fas fa-comments"></i></div>
+          <h1 class="logo">facebook <span>co</span></h1>
+        </div>
+        <p class="tagline">Connect with friends and the world around you on <strong>facebook co</strong>.</p>
+        <div class="login-features">
+          <div class="lf-item"><i class="fas fa-user-plus"></i> <span>Create a Page for a celebrity, brand or business.</span></div>
+          <div class="lf-item"><i class="fas fa-shield-alt"></i> <span>Your data is private and secure with us.</span></div>
+        </div>
+      </div>
+      <div class="login-card">
+        <form id="login-form">
+          <h2 class="login-welcome">Welcome back</h2>
+          <p class="login-sub">Log in to see what's new.</p>
+          <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="text" id="login-email" placeholder="Email or phone number" required>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="login-password" placeholder="Password" required>
+          </div>
+          <button type="button" class="login-btn" onclick="handleLogin()">Log In <i class="fas fa-arrow-right"></i></button>
+          <a href="#" class="forgot-link" onclick="alert('Password reset coming soon!'); return false">Forgotten password?</a>
+          <div class="login-divider"><span>or</span></div>
+          <button type="button" class="signup-btn" onclick="showRegister()">Create new account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="register-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="hideRegister()"></div>
+    <div class="modal-content animate-modal">
+      <button class="close" onclick="hideRegister()">&times;</button>
+      <h2>Sign Up</h2>
+      <p class="modal-sub">It's quick and easy.</p>
+      <form id="register-form">
+        <div class="name-row">
+          <div class="input-group"><input type="text" id="reg-firstname" placeholder="First name" required></div>
+          <div class="input-group"><input type="text" id="reg-lastname" placeholder="Surname" required></div>
+        </div>
+        <div class="input-group"><input type="text" id="reg-email" placeholder="Mobile number or email address" required></div>
+        <div class="input-group"><input type="password" id="reg-password" placeholder="New password" required></div>
+        <div class="dob-label">Date of birth</div>
+        <div class="dob-row">
+          <select id="reg-day"></select>
+          <select id="reg-month"></select>
+          <select id="reg-year"></select>
+        </div>
+        <div class="gender-label">Gender</div>
+        <div class="gender-row">
+          <label class="gender-option"><input type="radio" name="gender" value="female" required> Female</label>
+          <label class="gender-option"><input type="radio" name="gender" value="male"> Male</label>
+          <label class="gender-option"><input type="radio" name="gender" value="custom"> Custom</label>
+        </div>
+        <p class="terms">By clicking Sign Up, you agree to our Terms, Data Policy and Cookie Policy.</p>
+        <button type="button" class="signup-submit" onclick="handleRegister()">Sign Up</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" style="display:none;">
+    <nav class="topbar">
+      <div class="topbar-left">
+        <div class="logo-sm"><i class="fas fa-comments"></i> facebook <span>co</span></div>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search facebook co">
+        </div>
+      </div>
+      <div class="topbar-center">
+        <div class="nav-icon active" onclick="showFeed(); switchNav(this)"><i class="fas fa-home"></i></div>
+        <div class="nav-icon" onclick="alert('Video coming soon!'); switchNav(this)"><i class="fas fa-tv"></i></div>
+        <div class="nav-icon" onclick="switchNav(this)"><i class="fas fa-store"></i></div>
+        <div class="nav-icon" onclick="showGroups(); switchNav(this)"><i class="fas fa-users"></i></div>
+        <div class="nav-icon" onclick="switchNav(this)"><i class="fas fa-gamepad"></i></div>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-icon" onclick="toggleProfileMenu()">
+          <img src="https://via.placeholder.com/40" alt="profile" id="nav-avatar">
+          <span id="nav-username">User</span>
+        </div>
+        <div class="icon-btn" onclick="alert('Quick actions coming soon!')"><i class="fas fa-plus"></i></div>
+        <div class="icon-btn" onclick="openMessenger()"><i class="fab fa-facebook-messenger"></i><span class="badge" id="msg-badge" style="display:none">0</span></div>
+        <div class="icon-btn" onclick="toggleNotifications()"><i class="fas fa-bell"></i><span class="badge" style="display:none">0</span></div>
+        <div class="icon-btn" onclick="toggleProfileMenu()"><i class="fas fa-caret-down"></i></div>
+      </div>
+    </nav>
+
+    <div id="notif-dropdown" class="dropdown-menu" style="display:none">
+      <div class="dropdown-header"><strong>Notifications</strong> <small onclick="document.getElementById('notif-dropdown').style.display='none'" style="cursor:pointer">Mark all as read</small></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#e7f3ff"><i class="fas fa-thumbs-up" style="color:var(--primary)"></i></div><div><strong>Jane Doe</strong> liked your post.</div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#e7f3ff"><i class="fas fa-comment" style="color:var(--primary)"></i></div><div><strong>John Smith</strong> commented on your post.</div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#fff3cd"><i class="fas fa-user-plus" style="color:#f7b928"></i></div><div><strong>Emily Brown</strong> sent you a friend request.</div></div>
+    </div>
+    <div id="messenger-overlay" class="messenger-overlay" onclick="closeMessenger()"></div>
+    <div id="messenger-panel" class="messenger-panel" style="display:none">
+      <div class="mp-header">
+        <div class="mp-header-left">
+          <strong id="mp-title">Chats</strong>
+          <span class="mp-online-count" id="mp-online-count"></span>
+        </div>
+        <div class="mp-header-actions">
+          <button class="mp-close-btn" onclick="closeMessenger()">&times;</button>
+        </div>
+      </div>
+      <div class="mp-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="mp-search-input" placeholder="Search contacts..." oninput="filterChatContacts(this.value)">
+      </div>
+      <div id="mp-contacts" class="mp-contacts">
+        <div class="mp-loading">Loading contacts...</div>
+      </div>
+      <div id="mp-chat-view" class="mp-chat-view" style="display:none">
+        <div class="mp-chat-top">
+          <button class="mp-back-btn" onclick="showChatContacts()"><i class="fas fa-arrow-left"></i></button>
+          <div class="mp-chat-user-info" id="mp-chat-user-info"></div>
+        </div>
+        <div id="mp-messages" class="mp-messages"></div>
+        <div class="mp-input-area">
+          <input type="text" id="mp-input" placeholder="Aa" onkeypress="if(event.key==='Enter')sendMessage()">
+          <button class="mp-send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="main-layout">
+      <aside class="left-sidebar">
+        <div class="sidebar-user" onclick="showProfile()">
+          <div class="avatar-ring">
+            <img src="https://via.placeholder.com/36" alt="avatar" id="sidebar-avatar">
+          </div>
+          <span id="sidebar-name">User</span>
+        </div>
+        <div class="sidebar-item" onclick="showFriends()"><i class="fas fa-user-friends"></i> Friends</div>
+        <div class="sidebar-item" onclick="alert('Memories coming soon!')"><i class="fas fa-clock"></i> Memories</div>
+        <div class="sidebar-item" onclick="alert('Saved items coming soon!')"><i class="fas fa-bookmark"></i> Saved</div>
+        <div class="sidebar-item" onclick="showGroups()"><i class="fas fa-users"></i> Groups</div>
+        <div class="sidebar-item" onclick="alert('Video coming soon!')"><i class="fas fa-video"></i> Video</div>
+        <div class="sidebar-item" onclick="alert('Marketplace coming soon!')"><i class="fas fa-store"></i> Marketplace</div>
+        <div class="sidebar-item" onclick="alert('Pages coming soon!')"><i class="fas fa-flag"></i> Pages</div>
+        <div class="sidebar-item" onclick="alert('Events coming soon!')"><i class="fas fa-calendar"></i> Events</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item" onclick="showCoinsModal()"><i class="fas fa-coins" style="color:var(--primary)"></i> <span id="sidebar-coins">0</span> <span style="color:var(--text-secondary);font-size:13px">coins</span></div>
+        <div class="sidebar-item" onclick="showSettings()"><i class="fas fa-cog"></i> Settings</div>
+        <div class="sidebar-item" onclick="showCoinsModal()"><i class="fas fa-star" style="color:#f7b928"></i> Support Us</div>
+        <div class="sidebar-item" onclick="toggleDarkMode(this)"><i class="fas fa-moon"></i> Dark Mode</div>
+        <div class="sidebar-item logout-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
+      </aside>
+
+      <main class="feed">
+        <div class="stories-row" id="stories-row"></div>
+
+        <div class="create-post">
+          <div class="create-post-top">
+            <div class="avatar-ring sm"><img src="https://via.placeholder.com/40" alt="avatar" id="post-avatar"></div>
+            <div class="post-input-btn" onclick="openPostModal()">
+              <span>What's on your mind?</span>
+            </div>
+          </div>
+          <div class="create-post-divider"></div>
+          <div class="create-post-actions">
+            <span><i class="fas fa-video" style="color:#f3425f"></i> Live video</span>
+            <span onclick="pickFile()"><i class="fas fa-image" style="color:#45bd62"></i> Photo/video</span>
+            <span><i class="fas fa-smile" style="color:#f7b928"></i> Feeling/activity</span>
+          </div>
+        </div>
+
+        <div id="posts-container"></div>
+      </main>
+
+      <aside class="right-sidebar">
+        <div class="rs-header"><h4>Sponsor Us</h4></div>
+        <div class="ad-card" onclick="showCoinsModal()" style="cursor:pointer">
+          <img src="https://via.placeholder.com/280x140/1877f2/ffffff?text=Support+facebook+co" alt="support">
+          <div class="ad-info">
+            <p class="ad-title">⚡ Buy Coins & Premium</p>
+            <small>Unlock features & support the dev</small>
+          </div>
+        </div>
+
+        <div class="rs-divider"></div>
+        <div class="rs-header"><h4>Birthdays</h4></div>
+        <p class="birthday-item"><i class="fas fa-gift"></i> <span><strong>Alex J.</strong> and <strong>3 others</strong> have birthdays today.</span></p>
+
+        <div class="rs-divider"></div>
+        <div class="rs-header"><h4>Contacts</h4> <i class="fas fa-video"></i><i class="fas fa-search"></i><i class="fas fa-ellipsis-h"></i></div>
+        <div class="contact-item"><span class="online-dot"></span> <div class="contact-avatar" style="background:#667eea">J</div> Jane Doe</div>
+        <div class="contact-item"><span class="online-dot"></span> <div class="contact-avatar" style="background:#f5576c">J</div> John Smith</div>
+        <div class="contact-item"><span class="online-dot"></span> <div class="contact-avatar" style="background:#43e97b">E</div> Emily Brown</div>
+        <div class="contact-item"><span class="online-dot"></span> <div class="contact-avatar" style="background:#f7b928">M</div> Mike Wilson</div>
+        <div class="contact-item"><div class="contact-avatar offline" style="background:#a29bfe">S</div> Sarah Lee</div>
+      </aside>
+    </div>
+  </div>
+
+  <div id="profile-page" class="profile-page" style="display:none;">
+    <div class="profile-cover"></div>
+    <div class="profile-header">
+      <div class="profile-avatar-ring">
+        <img src="https://via.placeholder.com/168" alt="" id="profile-avatar">
+      </div>
+      <h1 id="profile-name">User</h1>
+      <p id="profile-friends-count" class="profile-friends">0 friends</p>
+      <div class="profile-actions">
+        <button class="profile-btn primary" onclick="showFeed()"><i class="fas fa-arrow-left"></i> Back to Feed</button>
+        <button class="profile-btn"><i class="fas fa-user-friends"></i> Friends</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="friends-page" class="profile-page" style="display:none;">
+    <div class="profile-cover" style="background:linear-gradient(135deg, #667eea, #764ba2)"></div>
+    <div class="friends-container">
+      <div class="friends-header">
+        <div class="friends-tabs">
+          <button class="friends-tab active" onclick="switchFriendsTab('all', this)">All Friends</button>
+          <button class="friends-tab" onclick="switchFriendsTab('requests', this)">Requests <span id="requests-badge" class="friends-badge"></span></button>
+          <button class="friends-tab" onclick="switchFriendsTab('suggestions', this)">Suggestions</button>
+        </div>
+        <button class="profile-btn primary" onclick="showFeed()"><i class="fas fa-arrow-left"></i> Back</button>
+      </div>
+      <div id="friends-content" class="friends-content">
+        <div class="friends-loading">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="groups-page" class="profile-page" style="display:none;">
+    <div class="profile-cover" style="background:linear-gradient(135deg, #42b72a, #2ecc71)"></div>
+    <div class="friends-container">
+      <div class="friends-header">
+        <div class="friends-tabs">
+          <button class="friends-tab active" onclick="switchGroupsTab('my', this)">My Groups</button>
+          <button class="friends-tab" onclick="switchGroupsTab('discover', this)">Discover</button>
+        </div>
+        <button class="profile-btn primary" onclick="showFeed()"><i class="fas fa-arrow-left"></i> Back</button>
+      </div>
+      <div style="margin-bottom:16px">
+        <button class="friend-btn primary" onclick="showCreateGroupModal()"><i class="fas fa-plus"></i> Create Group</button>
+      </div>
+      <div id="groups-content" class="friends-content">
+        <div class="friends-loading">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="group-detail-page" class="profile-page" style="display:none;">
+    <div class="profile-cover" id="group-detail-cover" style="background:linear-gradient(135deg, #42b72a, #2ecc71)"></div>
+    <div class="friends-container">
+      <div class="friends-header">
+        <div>
+          <h2 id="group-detail-name" style="color:white;text-shadow:0 1px 4px rgba(0,0,0,0.3);font-size:24px">Group Name</h2>
+          <p id="group-detail-meta" style="color:rgba(255,255,255,0.8);font-size:14px;margin-top:4px"></p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="friend-btn secondary" onclick="showGroups()"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="friend-btn primary" id="group-join-btn" onclick="toggleGroupJoin()">Join</button>
+        </div>
+      </div>
+      <div id="group-detail-posts"></div>
+    </div>
+  </div>
+
+  <div id="settings-page" class="profile-page" style="display:none;">
+    <div class="profile-cover" style="background:linear-gradient(135deg, #65676b, #8a8d91)"></div>
+    <div class="friends-container">
+      <div class="friends-header">
+        <div class="friends-tabs">
+          <button class="friends-tab active" onclick="switchSettingsTab('account', this)"><i class="fas fa-user"></i> Account</button>
+          <button class="friends-tab" onclick="switchSettingsTab('security', this)"><i class="fas fa-lock"></i> Security</button>
+          <button class="friends-tab" onclick="switchSettingsTab('privacy', this)"><i class="fas fa-eye"></i> Privacy</button>
+          <button class="friends-tab" onclick="switchSettingsTab('help', this)"><i class="fas fa-question-circle"></i> Help</button>
+          <button class="friends-tab" onclick="switchSettingsTab('about', this)"><i class="fas fa-info-circle"></i> About</button>
+        </div>
+        <button class="profile-btn primary" onclick="showFeed()"><i class="fas fa-arrow-left"></i> Back</button>
+      </div>
+      <div id="settings-content" class="friends-content"></div>
+    </div>
+  </div>
+
+  <div id="create-group-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="if(event.target===this)document.getElementById('create-group-modal').style.display='none'"></div>
+    <div class="modal-content animate-modal">
+      <button class="close" onclick="document.getElementById('create-group-modal').style.display='none'">&times;</button>
+      <h3>Create Group</h3>
+      <p class="modal-sub">Start a community on facebook co</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+        <div class="input-group"><input type="text" id="group-name-input" placeholder="Group name (required)"></div>
+        <div class="input-group"><textarea id="group-desc-input" placeholder="Description (optional)" rows="3" style="width:100%;padding:12px 0;border:none;background:transparent;outline:none;resize:none;font-size:16px"></textarea></div>
+        <button class="post-submit" onclick="createGroup()">Create Group</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="post-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="if(event.target===this)document.getElementById('post-modal').style.display='none'"></div>
+    <div class="modal-content post-modal-content animate-modal">
+      <button class="close" onclick="document.getElementById('post-modal').style.display='none'">&times;</button>
+      <h3>Create Post</h3>
+      <div class="post-modal-user">
+        <div class="avatar-ring"><img src="https://via.placeholder.com/40" alt="avatar" id="modal-avatar"></div>
+        <div>
+          <strong id="modal-name">User</strong>
+          <div class="post-privacy"><i class="fas fa-user-friends"></i> Friends <i class="fas fa-caret-down"></i></div>
+        </div>
+      </div>
+      <textarea id="post-textarea" placeholder="What's on your mind?" rows="4"></textarea>
+      <div id="post-preview" class="post-preview" style="display:none">
+        <img id="preview-image" src="" alt="">
+        <button class="remove-preview" onclick="removePreview()">&times;</button>
+      </div>
+      <div class="post-attachments">
+        <i class="fas fa-image" style="color:#45bd62;cursor:pointer" onclick="pickFile()"></i>
+        <i class="fas fa-video" style="color:#f3425f;cursor:pointer" onclick="pickFile()"></i>
+        <i class="fas fa-smile" style="color:#f7b928"></i>
+        <i class="fas fa-map-marker-alt" style="color:#f3425f"></i>
+        <i class="fas fa-tag" style="color:#1877f2"></i>
+        <i class="fas fa-ellipsis-h"></i>
+      </div>
+      <button class="post-submit" onclick="submitPost()">Post</button>
+      <input type="file" id="file-input" accept="image/*,video/*" hidden onchange="handleFileSelect(event)">
+    </div>
+  </div>
+
+  <div id="story-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="if(event.target===this)closeStoryModal()"></div>
+    <div class="modal-content post-modal-content animate-modal">
+      <button class="close" onclick="closeStoryModal()">&times;</button>
+      <h3>Create Story</h3>
+      <div class="post-modal-user">
+        <div class="avatar-ring"><img src="https://via.placeholder.com/40" alt="avatar" id="story-modal-avatar"></div>
+        <div>
+          <strong id="story-modal-name">User</strong>
+          <div class="post-privacy"><i class="fas fa-user-friends"></i> Friends</div>
+        </div>
+      </div>
+      <div class="story-modal-preview" id="story-modal-preview">
+        <div class="story-modal-placeholder" id="story-modal-placeholder">
+          <i class="fas fa-camera"></i>
+          <p>Choose a photo or video for your story</p>
+          <button class="profile-btn primary" onclick="pickStoryFile()">Select from computer</button>
+        </div>
+        <div class="story-modal-media" id="story-modal-media" style="display:none"></div>
+      </div>
+      <input type="file" id="story-file-input" accept="image/*,video/*" hidden onchange="handleStoryFileSelect(event)">
+      <button class="post-submit" id="story-submit-btn" onclick="submitStory()" style="display:none">Share to Story</button>
+    </div>
+  </div>
+
+  <div id="coins-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="if(event.target===this)document.getElementById('coins-modal').style.display='none'"></div>
+    <div class="modal-content animate-modal" style="max-width:480px">
+      <button class="close" onclick="document.getElementById('coins-modal').style.display='none'">&times;</button>
+      <h3 style="margin-bottom:4px"><i class="fas fa-coins" style="color:#f7b928"></i> Support facebook co</h3>
+      <p class="modal-sub">Buy coins to unlock premium features and support development.</p>
+
+      <div id="coins-balance" style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin:16px 0;text-align:center;font-size:20px;font-weight:700">
+        <i class="fas fa-coins" style="color:#f7b928"></i> <span id="coins-display">0</span> coins
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0">
+        <div class="coin-package" onclick="buyCoins(100)"><strong>100</strong><small>coins</small><span>$1</span></div>
+        <div class="coin-package" onclick="buyCoins(500)"><strong>500</strong><small>coins</small><span>$4</span></div>
+        <div class="coin-package" onclick="buyCoins(2000)"><strong>2000</strong><small>coins</small><span>$12</span></div>
+        <div class="coin-package" onclick="buyCoins(10000)"><strong>10K</strong><small>coins</small><span>$50</span></div>
+      </div>
+
+      <div style="margin:16px 0;border-top:1px solid var(--border);padding-top:16px">
+        <h4 style="margin-bottom:12px"><i class="fas fa-crown" style="color:#f7b928"></i> Premium Plans</h4>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+          <div class="premium-plan" onclick="buyPremium('basic')">
+            <div class="plan-badge">BASIC</div>
+            <strong>100 coins/mo</strong>
+            <small>Premium badge, no ads</small>
+          </div>
+          <div class="premium-plan" onclick="buyPremium('pro')">
+            <div class="plan-badge pro">PRO</div>
+            <strong>500 coins/yr</strong>
+            <small>All basic + priority support</small>
+          </div>
+        </div>
+        <p id="premium-status" style="margin-top:12px;font-size:13px;color:var(--text-secondary);text-align:center"></p>
+      </div>
+
+      <p style="text-align:center;font-size:12px;color:var(--text-secondary)">⚡ Mock system — no real payment is processed</p>
+    </div>
+  </div>
+
+  <div id="story-viewer" class="story-viewer" style="display:none;">
+    <div class="story-viewer-overlay" onclick="closeStoryViewer()"></div>
+    <div class="story-viewer-content">
+      <div class="story-viewer-top">
+        <div class="story-viewer-user">
+          <img src="" alt="" id="story-viewer-avatar">
+          <strong id="story-viewer-name"></strong>
+          <span id="story-viewer-time"></span>
+        </div>
+        <button class="story-viewer-close" onclick="closeStoryViewer()">&times;</button>
+      </div>
+      <div class="story-viewer-media" id="story-viewer-media"></div>
+      <div class="story-viewer-nav">
+        <button class="story-nav-btn" onclick="prevStory()"><i class="fas fa-chevron-left"></i></button>
+        <button class="story-nav-btn" onclick="nextStory()"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js')</script>
+</body>
+</html>
