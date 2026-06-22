@@ -1,4 +1,4 @@
-const API = 'http://localhost:3001/api';
+const API = window.location.origin + '/api';
 let currentUser = null;
 let token = null;
 let posts = [];
