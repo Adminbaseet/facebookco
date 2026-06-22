@@ -2,3 +2,9 @@ node_modules/
 backend/facebookco.db
 .env
 *.log
+
+backend/facebookco.db*
+backend/*.err
+backend/test-install/
+backend/uploads/
+
