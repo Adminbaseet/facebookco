@@ -5,7 +5,7 @@ const { authenticateToken } = require('./middleware/auth');
 const router = express.Router();
 
 router.get('/users', authenticateToken, (req, res) => {
-  const users = db.queryAll('SELECT id, firstname, lastname, avatar FROM users WHERE id != ?', [req.user.id]);
+  const users = db.friends.getFriends(req.user.id);
   res.json({ users });
 });
 
@@ -14,14 +14,17 @@ router.get('/conversations', authenticateToken, (req, res) => {
   const result = conversations.map(c => {
     const otherId = c.participants.find(p => p !== req.user.id);
     const otherUser = otherId ? db.users.findById(otherId) : null;
+    if (!otherUser) return null;
+    const status = db.friends.getStatus(req.user.id, otherId);
+    if (status !== 'friends') return null;
     return {
       id: c.id,
-      with_user: otherUser ? { id: otherUser.id, firstname: otherUser.firstname, lastname: otherUser.lastname, avatar: otherUser.avatar } : null,
+      with_user: { id: otherUser.id, firstname: otherUser.firstname, lastname: otherUser.lastname, avatar: otherUser.avatar },
       last_message: c.last_message,
       last_activity: c.last_activity,
       participants: c.participants
     };
-  });
+  }).filter(Boolean);
   res.json({ conversations: result });
 });
 
@@ -29,6 +32,9 @@ router.post('/conversations', authenticateToken, (req, res) => {
   const { user_id } = req.body;
   if (!user_id) return res.status(400).json({ error: 'user_id is required' });
   if (user_id === req.user.id) return res.status(400).json({ error: 'Cannot chat with yourself' });
+
+  const status = db.friends.getStatus(req.user.id, user_id);
+  if (status !== 'friends') return res.status(403).json({ error: 'Must be friends to chat' });
 
   const otherUser = db.users.findById(user_id);
   if (!otherUser) return res.status(404).json({ error: 'User not found' });
@@ -58,6 +64,10 @@ router.get('/conversations/:id/messages', authenticateToken, (req, res) => {
   if (!conv) return res.status(404).json({ error: 'Conversation not found' });
   if (!conv.participants.includes(req.user.id)) return res.status(403).json({ error: 'Not a participant' });
 
+  const otherId = conv.participants.find(p => p !== req.user.id);
+  const status = db.friends.getStatus(req.user.id, otherId);
+  if (status !== 'friends') return res.status(403).json({ error: 'Must be friends to view messages' });
+
   const messages = db.messages.findByConversation(convId);
   const result = messages.map(m => {
     const user = db.users.findById(m.sender_id);
@@ -81,6 +91,10 @@ router.post('/conversations/:id/messages', authenticateToken, (req, res) => {
   const conv = db.conversations.findById(convId);
   if (!conv) return res.status(404).json({ error: 'Conversation not found' });
   if (!conv.participants.includes(req.user.id)) return res.status(403).json({ error: 'Not a participant' });
+
+  const otherId = conv.participants.find(p => p !== req.user.id);
+  const status = db.friends.getStatus(req.user.id, otherId);
+  if (status !== 'friends') return res.status(403).json({ error: 'Must be friends to send messages' });
 
   const msg = db.messages.create({
     conversation_id: convId,

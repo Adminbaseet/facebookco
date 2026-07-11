@@ -462,27 +462,17 @@ async function renderChatContacts(conversations) {
   const container = document.getElementById('mp-contacts');
   const searchVal = (document.getElementById('mp-search-input').value || '').toLowerCase();
 
-  // Get all users too
-  let allUsers = [];
-  try {
-    const res = await fetch(`${API}/chat/users`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const data = await res.json();
-    allUsers = data.users || [];
-  } catch {}
-
-  // Merge: conversations first, then remaining users
-  const convUserIds = new Set(conversations.filter(c => c.with_user).map(c => c.with_user.id));
-  const extraUsers = allUsers.filter(u => !convUserIds.has(u.id));
-
-  const combined = [
-    ...conversations.filter(c => c.with_user).map(c => ({ type: 'conv', id: c.with_user.id, name: `${c.with_user.firstname} ${c.with_user.lastname}`, avatar: c.with_user.avatar, preview: c.last_message ? c.last_message.text : 'Start a conversation' })),
-    ...extraUsers.map(u => ({ type: 'user', id: u.id, name: `${u.firstname} ${u.lastname}`, avatar: u.avatar, preview: 'Start a conversation' }))
-  ];
+  const combined = conversations.filter(c => c.with_user).map(c => ({
+    id: c.with_user.id,
+    name: `${c.with_user.firstname} ${c.with_user.lastname}`,
+    avatar: c.with_user.avatar,
+    preview: c.last_message ? c.last_message.text : 'Start a conversation'
+  }));
 
   const filtered = combined.filter(c => c.name.toLowerCase().includes(searchVal));
 
   if (filtered.length === 0) {
-    container.innerHTML = '<div class="mp-empty">No contacts match your search.</div>';
+    container.innerHTML = '<div class="mp-empty">No friends yet. Add friends from the Friends page!</div>';
   } else {
     container.innerHTML = filtered.map(c => {
       const initials = getInitials(c.name);
@@ -643,9 +633,12 @@ async function renderSidebarContacts() {
   const container = document.getElementById('sidebar-contacts');
   if (!container || !token) return;
   try {
-    const res = await fetch(`${API}/chat/users`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const data = await res.json();
-    const users = (data.users || []).slice(0, 8);
+    const friends = await loadFriendList();
+    const users = friends.slice(0, 8);
+    if (users.length === 0) {
+      container.innerHTML = '<div class="contact-item" style="cursor:default;color:var(--text-secondary);font-size:13px">Add friends to see them here</div>';
+      return;
+    }
     container.innerHTML = users.map(u => {
       const initials = getInitials(`${u.firstname} ${u.lastname}`);
       const colors = ['667eea','f5576c','43e97b','f7b928','a29bfe','1877f2','42b72a','e74c3c'];
@@ -657,6 +650,15 @@ async function renderSidebarContacts() {
       </div>`;
     }).join('');
   } catch {}
+}
+
+async function loadFriendList() {
+  if (!token) return [];
+  try {
+    const res = await fetch(`${API}/friends`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    return data.friends || [];
+  } catch { return []; }
 }
 
 /* ========== FRIENDS ========== */
