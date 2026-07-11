@@ -83,6 +83,7 @@ async function enterApp() {
   await loadPosts();
   await loadFriendCount();
   await loadCoins();
+  await renderSidebarContacts();
 }
 
 function handleLogout() {
@@ -636,6 +637,26 @@ function showChatContacts() {
 function updateOnlineCount() {
   const count = chatContacts.length;
   document.getElementById('mp-online-count').textContent = count > 0 ? `${count} active` : '';
+}
+
+async function renderSidebarContacts() {
+  const container = document.getElementById('sidebar-contacts');
+  if (!container || !token) return;
+  try {
+    const res = await fetch(`${API}/chat/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    const users = (data.users || []).slice(0, 8);
+    container.innerHTML = users.map(u => {
+      const initials = getInitials(`${u.firstname} ${u.lastname}`);
+      const colors = ['667eea','f5576c','43e97b','f7b928','a29bfe','1877f2','42b72a','e74c3c'];
+      const color = colors[u.id % colors.length];
+      return `<div class="contact-item" onclick="openMessenger();setTimeout(()=>openChat(${u.id}),100)">
+        <span class="online-dot"></span>
+        <div class="contact-avatar" style="background:${color}">${initials}</div>
+        ${u.firstname} ${u.lastname}
+      </div>`;
+    }).join('');
+  } catch {}
 }
 
 /* ========== FRIENDS ========== */
