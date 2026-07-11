@@ -461,35 +461,45 @@ async function renderChatContacts(conversations) {
   const container = document.getElementById('mp-contacts');
   const searchVal = (document.getElementById('mp-search-input').value || '').toLowerCase();
 
-  let html = '';
-  if (conversations.length === 0) {
-    html = '<div class="mp-loading">No conversations yet. Click a contact to start chatting!</div>';
+  // Get all users too
+  let allUsers = [];
+  try {
+    const res = await fetch(`${API}/chat/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    allUsers = data.users || [];
+  } catch {}
+
+  // Merge: conversations first, then remaining users
+  const convUserIds = new Set(conversations.filter(c => c.with_user).map(c => c.with_user.id));
+  const extraUsers = allUsers.filter(u => !convUserIds.has(u.id));
+
+  const combined = [
+    ...conversations.filter(c => c.with_user).map(c => ({ type: 'conv', id: c.with_user.id, name: `${c.with_user.firstname} ${c.with_user.lastname}`, avatar: c.with_user.avatar, preview: c.last_message ? c.last_message.text : 'Start a conversation' })),
+    ...extraUsers.map(u => ({ type: 'user', id: u.id, name: `${u.firstname} ${u.lastname}`, avatar: u.avatar, preview: 'Start a conversation' }))
+  ];
+
+  const filtered = combined.filter(c => c.name.toLowerCase().includes(searchVal));
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="mp-empty">No contacts match your search.</div>';
   } else {
-    const filtered = conversations.filter(c => {
-      if (!c.with_user) return false;
-      const name = `${c.with_user.firstname} ${c.with_user.lastname}`.toLowerCase();
-      return name.includes(searchVal);
-    });
-    if (filtered.length === 0) {
-      html = '<div class="mp-empty">No contacts match your search.</div>';
-    } else {
-      html = filtered.map(c => {
-        const name = c.with_user ? `${c.with_user.firstname} ${c.with_user.lastname}` : 'Unknown';
-        const avatar = c.with_user?.avatar || getAvatar(c.with_user?.firstname || 'U', c.with_user?.lastname || 'U', '1877f2');
-        const preview = c.last_message ? c.last_message.text : 'Start a conversation';
-        const initials = getInitials(name);
-        return `<div class="mp-contact-item" onclick="openChat(${c.with_user.id})">
-          <div class="mp-contact-avatar" style="background:linear-gradient(135deg,#1877f2,#42b72a)">
-            <img src="${avatar}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
-            <span style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${initials}</span>
-          </div>
-          <div class="mp-contact-info">
-            <div class="mp-contact-name">${name}</div>
-            <div class="mp-contact-preview">${preview}</div>
-          </div>
-        </div>`;
-      }).join('');
-    }
+    container.innerHTML = filtered.map(c => {
+      const initials = getInitials(c.name);
+      const avatar = c.avatar || getAvatar(c.name.split(' ')[0] || 'U', c.name.split(' ')[1] || 'U', '1877f2');
+      return `<div class="mp-contact-item" onclick="openChat(${c.id})">
+        <div class="mp-contact-avatar" style="background:linear-gradient(135deg,#1877f2,#42b72a)">
+          <img src="${avatar}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
+          <span style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px">${initials}</span>
+        </div>
+        <div class="mp-contact-info">
+          <div class="mp-contact-name">${c.name}</div>
+          <div class="mp-contact-preview">${c.preview}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  container.style.display = 'block';
+}
   }
   container.innerHTML = html;
   container.style.display = 'block';
