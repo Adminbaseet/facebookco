@@ -1,4 +1,4 @@
-const CACHE = 'fbco-v1';
+const CACHE = 'fbco-v2';
 const URLS = ['/', '/index.html', '/script.js', '/style.css', '/manifest.json', '/icon.svg'];
 
 self.addEventListener('install', e => {

@@ -4,6 +4,29 @@ let token = null;
 let posts = [];
 let selectedFile = null;
 
+function saveSession() {
+  if (token && currentUser) {
+    localStorage.setItem('fbco_token', token);
+    localStorage.setItem('fbco_user', JSON.stringify(currentUser));
+  }
+}
+
+function loadSession() {
+  const savedToken = localStorage.getItem('fbco_token');
+  const savedUser = localStorage.getItem('fbco_user');
+  if (savedToken && savedUser) {
+    token = savedToken;
+    currentUser = JSON.parse(savedUser);
+    return true;
+  }
+  return false;
+}
+
+function clearSession() {
+  localStorage.removeItem('fbco_token');
+  localStorage.removeItem('fbco_user');
+}
+
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
@@ -24,6 +47,28 @@ function populateDateFields() {
   for (let i = 2026; i >= 1905; i--) { const o = document.createElement('option'); o.value = i; o.textContent = i; year.appendChild(o); }
 }
 populateDateFields();
+
+(async function autoLogin() {
+  if (loadSession()) {
+    try {
+      const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        currentUser = data.user;
+        if (!currentUser.avatar) currentUser.avatar = getAvatar(currentUser.firstname, currentUser.lastname, '1877f2');
+        enterApp();
+      } else {
+        clearSession();
+        currentUser = null;
+        token = null;
+      }
+    } catch {
+      clearSession();
+      currentUser = null;
+      token = null;
+    }
+  }
+})();
 
 function showRegister() { document.getElementById('register-modal').style.display = 'flex'; }
 function hideRegister() { document.getElementById('register-modal').style.display = 'none'; }
@@ -50,6 +95,7 @@ async function handleRegister() {
     currentUser = data.user;
     currentUser.friends = 0;
     if (!currentUser.avatar) currentUser.avatar = getAvatar(currentUser.firstname, currentUser.lastname, '42b72a');
+    saveSession();
     hideRegister();
     document.getElementById('register-form').reset();
     enterApp();
@@ -71,6 +117,7 @@ async function handleLogin() {
     currentUser = data.user;
     currentUser.friends = 128;
     if (!currentUser.avatar) currentUser.avatar = getAvatar(currentUser.firstname, currentUser.lastname, '1877f2');
+    saveSession();
     enterApp();
   } catch { alert('Connection error. Make sure the server is running.'); }
 }
@@ -90,6 +137,7 @@ function handleLogout() {
   currentUser = null;
   token = null;
   posts = [];
+  clearSession();
   hideAllPages();
   document.getElementById('login-page').style.display = 'flex';
   document.getElementById('login-form').reset();
@@ -489,10 +537,6 @@ async function renderChatContacts(conversations) {
       </div>`;
     }).join('');
   }
-  container.style.display = 'block';
-}
-  }
-  container.innerHTML = html;
   container.style.display = 'block';
 }
 

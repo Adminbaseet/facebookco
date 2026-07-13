@@ -31,6 +31,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'facebook co backend is running' });
 });
 
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err);
+});
+
 db.init().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`facebook co backend running on http://localhost:${PORT}`);

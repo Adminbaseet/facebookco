@@ -38,29 +38,38 @@ router.get('/', authenticateToken, (req, res) => {
 });
 
 router.post('/', authenticateToken, (req, res) => {
-  const { text, image } = req.body;
-  if ((!text || !text.trim()) && !image) return res.status(400).json({ error: 'Text or image is required' });
+  try {
+    const { text, image } = req.body;
+    if ((!text || !text.trim()) && !image) return res.status(400).json({ error: 'Text or image is required' });
 
-  const user = db.users.findById(req.user.id);
-  const post = db.posts.create({
-    user_id: req.user.id,
-    text: (text || '').trim(),
-    image: image || null
-  });
+    const user = db.users.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-  res.status(201).json({
-    post: {
-      id: post.id,
-      author: `${user.firstname} ${user.lastname}`,
-      avatar: user.avatar,
-      text: post.text,
-      image: post.image,
-      time: 'Just now',
-      likes: 0,
-      liked: false,
-      comments: []
-    }
-  });
+    const post = db.posts.create({
+      user_id: req.user.id,
+      text: (text || '').trim(),
+      image: image || null
+    });
+
+    if (!post) return res.status(500).json({ error: 'Failed to create post' });
+
+    res.status(201).json({
+      post: {
+        id: post.id,
+        author: `${user.firstname} ${user.lastname}`,
+        avatar: user.avatar,
+        text: post.text,
+        image: post.image,
+        time: 'Just now',
+        likes: 0,
+        liked: false,
+        comments: []
+      }
+    });
+  } catch (err) {
+    console.error('Create post error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 router.delete('/:id', authenticateToken, (req, res) => {

@@ -6,44 +6,56 @@ const { authenticateToken, generateToken } = require('../middleware/auth');
 const router = express.Router();
 
 router.post('/register', (req, res) => {
-  const { email, password, firstname, lastname, gender, day, month, year } = req.body;
-  if (!email || !password || !firstname || !lastname) {
-    return res.status(400).json({ error: 'All fields are required' });
+  try {
+    const { email, password, firstname, lastname, gender, day, month, year } = req.body;
+    if (!email || !password || !firstname || !lastname) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const existing = db.users.findByEmail(email);
+    if (existing) return res.status(409).json({ error: 'Email already registered' });
+
+    const hash = bcrypt.hashSync(password, 10);
+    const user = db.users.create({
+      email,
+      password: hash,
+      firstname,
+      lastname,
+      gender: gender || 'male',
+      dob_day: day || 1,
+      dob_month: month || 1,
+      dob_year: year || 2000,
+      avatar: ''
+    });
+
+    if (!user) return res.status(500).json({ error: 'Failed to create user. Try again.' });
+
+    const token = generateToken(user);
+    const { password: _, ...safeUser } = user;
+    res.status(201).json({ user: safeUser, token });
+  } catch (err) {
+    console.error('Register error:', err);
+    res.status(500).json({ error: 'Server error. Try again.' });
   }
-
-  const existing = db.users.findByEmail(email);
-  if (existing) return res.status(409).json({ error: 'Email already registered' });
-
-  const hash = bcrypt.hashSync(password, 10);
-  const user = db.users.create({
-    email,
-    password: hash,
-    firstname,
-    lastname,
-    gender: gender || 'male',
-    dob_day: day || 1,
-    dob_month: month || 1,
-    dob_year: year || 2000,
-    avatar: ''
-  });
-
-  const token = generateToken(user);
-  const { password: _, ...safeUser } = user;
-  res.status(201).json({ user: safeUser, token });
 });
 
 router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
-  const user = db.users.findByEmail(email);
-  if (!user || !bcrypt.compareSync(password, user.password)) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+    const user = db.users.findByEmail(email);
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = generateToken(user);
+    const { password: _, ...safeUser } = user;
+    res.json({ user: safeUser, token });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error. Try again.' });
   }
-
-  const token = generateToken(user);
-  const { password: _, ...safeUser } = user;
-  res.json({ user: safeUser, token });
 });
 
 router.get('/me', authenticateToken, (req, res) => {
